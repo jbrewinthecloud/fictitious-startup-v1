@@ -3,8 +3,7 @@ name: Build Custom AMI on Release
 on:
   release:
     types: [published]
-     
-    
+
 jobs:
   packer-build:
     name: Build AMI with Packer
@@ -34,9 +33,7 @@ jobs:
 
       - name: Extract version from release tag
         id: get-version
-        run: |
-          VERSION=${GITHUB_REF##*/}
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+        run: echo "version=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
 
       - name: Create secrets.sh file
         run: |
@@ -50,7 +47,6 @@ jobs:
         run: |
           zip -r app.zip . -x ".git/*" ".github/*" "secrets.sh"
 
-
       - name: Build AMI with release version
         run: |
-          packer build -var "version=${{ steps.get-version.outputs.VERSION }}" image.pkr.hcl
+          packer build -var "version=${{ steps.get-version.outputs.version }}" image.pkr.hcl
