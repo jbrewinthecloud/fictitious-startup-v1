@@ -4,11 +4,7 @@ on:
   release:
     types: [published]
      
-    - name: Zip application contents
-        run: |
-          zip -r app.zip . -x ".git/*" ".github/*" "secrets.sh"
-
-
+    
 jobs:
   packer-build:
     name: Build AMI with Packer
