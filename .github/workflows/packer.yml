@@ -3,6 +3,11 @@ name: Build Custom AMI on Release
 on:
   release:
     types: [published]
+     
+    - name: Zip application contents
+        run: |
+          zip -r app.zip . -x ".git/*" ".github/*" "secrets.sh"
+
 
 jobs:
   packer-build:
