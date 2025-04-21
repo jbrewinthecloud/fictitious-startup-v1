@@ -1,3 +1,12 @@
+packer {
+  required_plugins {
+    amazon = {
+      source  = "github.com/hashicorp/amazon"
+      version = ">= 1.0.0"
+    }
+  }
+}
+
 variable "version" {
   type    = string
   default = "1.0.0"
@@ -6,7 +15,7 @@ variable "version" {
 source "amazon-ebs" "ubuntu" {
   ami_name      = "cloudtalents-startup-v${var.version}"
   instance_type = "t2.micro"
-  region        = "us-east-1" # You can change this if you're using another region
+  region        = "us-east-1"
 
   source_ami_filter {
     filters = {
@@ -18,11 +27,10 @@ source "amazon-ebs" "ubuntu" {
     most_recent = true
   }
 
-  vpc_id                     = "vpc-0737da03f25acca74"
-  subnet_id                  = "subnet-035694339a4508f52"
+  vpc_id                      = "vpc-0737da03f25acca74"
+  subnet_id                   = "subnet-035694339a4508f52"
   associate_public_ip_address = true
-
-  ssh_username = "ubuntu"
+  ssh_username                = "ubuntu"
 }
 
 build {
@@ -40,9 +48,5 @@ build {
       "sudo mv /tmp/app/* /opt/app/",
       "sudo chown -R ubuntu:ubuntu /opt/app"
     ]
-  }
-
-  post-processor "amazon-ami-management" {
-    keep_releases = 2
   }
 }
