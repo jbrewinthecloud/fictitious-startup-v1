@@ -1,0 +1,50 @@
+name: Build Custom AMI on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  packer-build:
+    name: Build AMI with Packer
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v2
+        with:
+          version: 1.10.0
+
+      - name: Initialize Packer
+        run: packer init .
+
+      - name: Extract version from release tag
+        id: get-version
+        run: |
+          VERSION=${GITHUB_REF##*/}
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Create secrets.sh file
+        run: |
+          cat <<EOF > $GITHUB_WORKSPACE/secrets.sh
+          export SECRET_KEY="${{ secrets.SECRET_KEY }}"
+          export DB_USER="${{ secrets.DB_USER }}"
+          export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+          EOF
+
+      - name: Build AMI with release version
+        run: |
+          packer build -var "version=${{ steps.get-version.outputs.VERSION }}" image.pkr.hcl
