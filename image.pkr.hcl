@@ -44,9 +44,9 @@ build {
 
   provisioner "shell" {
     inline = [
-      "mkdir -p /opt/app",
-      "unzip /tmp/app.zip -d /opt/app",
-      "chown -R ubuntu:ubuntu /opt/app"
+      "sudo mkdir -p /opt/app",
+      "sudo unzip /tmp/app.zip -d /opt/app",
+      "sudo chown -R ubuntu:ubuntu /opt/app"
     ]
   }
 }
