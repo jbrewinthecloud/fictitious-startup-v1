@@ -1,52 +1,48 @@
-packer {
-  required_plugins {
-    amazon = {
-      source  = "github.com/hashicorp/amazon"
-      version = ">= 1.0.0"
-    }
-  }
-}
+name: Build Custom AMI on Release
 
-variable "version" {
-  type    = string
-  default = "1.0.0"
-}
+on:
+  release:
+    types: [published]
 
-source "amazon-ebs" "ubuntu" {
-  ami_name      = "cloudtalents-startup-v${var.version}"
-  instance_type = "t2.micro"
-  region        = "us-east-1"
+jobs:
+  packer-build:
+    name: Build AMI with Packer
+    runs-on: ubuntu-latest
 
-  source_ami_filter {
-    filters = {
-      name                = "ubuntu/images/*ubuntu-jammy-22.04-amd64-server*"
-      root-device-type    = "ebs"
-      virtualization-type = "hvm"
-    }
-    owners      = ["099720109477"]
-    most_recent = true
-  }
+    permissions:
+      id-token: write
+      contents: read
 
-  vpc_id                      = "vpc-0737da03f25acca74"
-  subnet_id                   = "subnet-035694339a4508f52"
-  associate_public_ip_address = true
-  ssh_username                = "ubuntu"
-}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
 
-build {
-  name    = "cloudtalents-startup-image"
-  sources = ["source.amazon-ebs.ubuntu"]
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
 
-  provisioner "file" {
-    source      = "."
-    destination = "/tmp/app"
-  }
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v2
+        with:
+          version: 1.10.0
 
-  provisioner "shell" {
-    inline = [
-      "sudo mkdir -p /opt/app",
-      "sudo mv /tmp/app/* /opt/app/",
-      "sudo chown -R ubuntu:ubuntu /opt/app"
-    ]
-  }
-}
+      - name: Initialize Packer
+        run: packer init .
+
+      - name: Extract version from release tag
+        id: get-version
+        run: |
+          VERSION=${GITHUB_REF##*/}
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Create secrets.sh file
+        run: |
+          cat <<EOF > $GITHUB_WORKSPACE/secrets.sh
+          export SECRET_KEY="${{ secrets.SECRET_KEY }}"
+          export DB_USER="${{ secrets.DB_USER }}"
+          export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+          EOF
+
+      - name: Build
