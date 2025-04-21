@@ -41,16 +41,19 @@ build {
   name    = "cloudtalents-startup-image"
   sources = ["source.amazon-ebs.ubuntu"]
 
-  provisioner "shell" {
+  provisioner "file" {
+  source      = "app.zip"
+  destination = "/tmp/app.zip"
+}
+
+provisioner "shell" {
   inline = [
-    "mkdir -p /tmp/app"
+    "mkdir -p /opt/app",
+    "unzip /tmp/app.zip -d /opt/app",
+    "chown -R ubuntu:ubuntu /opt/app"
   ]
 }
 
-provisioner "file" {
-  source      = "app.zip"
-  destination = "/tmp/app/app.zip"
-}
 
 provisioner "shell" {
   inline = [
