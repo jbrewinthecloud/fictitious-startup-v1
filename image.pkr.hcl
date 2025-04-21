@@ -38,24 +38,15 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
-  source      = "app.zip"
-  destination = "/tmp/app.zip"
+    source      = "app.zip"
+    destination = "/tmp/app.zip"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "mkdir -p /opt/app",
+      "unzip /tmp/app.zip -d /opt/app",
+      "chown -R ubuntu:ubuntu /opt/app"
+    ]
+  }
 }
-
-provisioner "shell" {
-  inline = [
-    "mkdir -p /opt/app",
-    "unzip /tmp/app.zip -d /opt/app",
-    "chown -R ubuntu:ubuntu /opt/app"
-  ]
-}
-
-
-provisioner "shell" {
-  inline = [
-    "mkdir -p /opt/app",
-    "unzip /tmp/app/app.zip -d /opt/app",
-    "chown -R ubuntu:ubuntu /opt/app"
-  ]
-}
-
