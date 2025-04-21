@@ -38,7 +38,7 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
-    source      = "."
+    source      = "./"
     destination = "/tmp/app"
   }
 
