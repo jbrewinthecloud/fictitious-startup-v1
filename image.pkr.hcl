@@ -42,6 +42,13 @@ build {
     destination = "/tmp/app.zip"
   }
 
+# First install unzip
+provisioner "shell" {
+  inline = [
+    "sudo apt-get update",
+    "sudo apt-get install -y unzip"
+  ]
+}
   provisioner "shell" {
     inline = [
       "sudo mkdir -p /opt/app",
