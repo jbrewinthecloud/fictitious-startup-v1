@@ -33,10 +33,6 @@ source "amazon-ebs" "ubuntu" {
   ssh_username                = "ubuntu"
 }
 
-      - name: Zip application contents
-        run: |
-          zip -r app.zip . -x ".git/*" ".github/*" "secrets.sh"
-
 build {
   name    = "cloudtalents-startup-image"
   sources = ["source.amazon-ebs.ubuntu"]
