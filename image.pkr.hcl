@@ -33,20 +33,30 @@ source "amazon-ebs" "ubuntu" {
   ssh_username                = "ubuntu"
 }
 
+      - name: Zip application contents
+        run: |
+          zip -r app.zip . -x ".git/*" ".github/*" "secrets.sh"
+
 build {
   name    = "cloudtalents-startup-image"
   sources = ["source.amazon-ebs.ubuntu"]
 
-  provisioner "file" {
-    source      = "./"
-    destination = "/tmp/app"
-  }
-
   provisioner "shell" {
-    inline = [
-      "sudo mkdir -p /opt/app",
-      "sudo mv /tmp/app/* /opt/app/",
-      "sudo chown -R ubuntu:ubuntu /opt/app"
-    ]
-  }
+  inline = [
+    "mkdir -p /tmp/app"
+  ]
 }
+
+provisioner "file" {
+  source      = "app.zip"
+  destination = "/tmp/app/app.zip"
+}
+
+provisioner "shell" {
+  inline = [
+    "mkdir -p /opt/app",
+    "unzip /tmp/app/app.zip -d /opt/app",
+    "chown -R ubuntu:ubuntu /opt/app"
+  ]
+}
+
