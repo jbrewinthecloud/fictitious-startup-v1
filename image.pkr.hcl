@@ -46,7 +46,7 @@ build {
 provisioner "shell" {
   inline = [
     "sudo apt-get update",
-    "sudo apt-get install -y unzip"
+    "sudo DEBIAN_FRONTEND=noninteractive apt-get install -y unzip"
   ]
 }
   provisioner "shell" {
