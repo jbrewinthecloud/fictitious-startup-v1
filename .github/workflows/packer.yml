@@ -45,4 +45,6 @@ jobs:
           export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
           EOF
 
-      - name: Build
+      - name: Build AMI with release version
+        run: |
+          packer build -var "version=${{ steps.get-version.outputs.VERSION }}" image.pkr.hcl
